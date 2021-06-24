@@ -1,0 +1,38 @@
+
+inv = invoice.getJSON("line_items");
+info invoice.getJSON("customer_name");
+// info inv;
+for each  i in inv
+{
+	if(i.getJSON("name").containsIgnoreCase("[##"))
+	{
+		len = i.getJSON("name").length();
+		item_name = i.getJSON("name").subString(12,len);
+		item_no = i.getJSON("name").subString(4,7);
+		res = invokeurl
+		[
+			url :"https://desk.zoho.com/api/v1/tickets/search?ticketNumber=" + item_no
+			type :GET
+			connection:"z_desk"
+		];
+		info res;
+		if(res.isNull() == false)
+		{
+			data = res.getJSON("data");
+			if(data != null)
+			{
+				info data;
+				ticket_id = data.getJSON("id");
+				if(ticket_id != null)
+				{
+					mp = Map();
+					mp.put("Invoice URL","https://books.zoho.com/app#/invoices/" + invoice.getJSON("invoice_id"));
+					last = Map();
+					last.put("customFields",mp);
+					upd = zoho.desk.update("123456","tickets",ticket_id,last,"z_desk");
+					info upd;
+				}
+			}
+		}
+	}
+}
